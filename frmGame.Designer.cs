@@ -93,6 +93,7 @@ namespace helicopter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(195)))), ((int)(((byte)(204)))), ((int)(((byte)(181)))));
             this.ClientSize = new System.Drawing.Size(644, 511);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.picbHelicopter);
@@ -100,7 +101,7 @@ namespace helicopter
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "frmGame";
-            this.Text = "Form1";
+            this.Text = "Flappy Helicopter - Game";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmGame_FormClosing);
             this.Load += new System.EventHandler(this.frmGame_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.frmGame_KeyDown);

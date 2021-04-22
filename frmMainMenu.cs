@@ -25,14 +25,9 @@ namespace helicopter
             frmGame.Show();
         }
 
-        private void btnHelp_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void btnCredits_Click(object sender, EventArgs e)
         {
-
+            MessageBox.Show("Developed by Ben Davies \nhttps://github.com/bxdavies/helicopter");
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -40,9 +35,5 @@ namespace helicopter
             Application.Exit();
         }
 
-        private void frmMainMenu_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

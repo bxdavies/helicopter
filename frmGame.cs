@@ -29,11 +29,16 @@ namespace helicopter
         public Random rndRandomNumber = new Random();
         public int intScore = 0;
         public bool blnGameStart = false;
-        public bool blnGameActive = false;
+        public bool blnGameActive = false; 
 
-        public Thread t;
+        public Thread thrHelicopterMovement;
+
+
+        // Form Load Event
         private void frmGame_Load(object sender, EventArgs e)
         {
+
+            // Create top Obstacles
             for (int i = 0; i < 22; i++)
             {
                 PictureBox picbObstacles = new PictureBox
@@ -49,6 +54,7 @@ namespace helicopter
                 Controls.Add(picbObstacles);
             }
 
+            // Create Bottom Obstacles
             int intBottomObstacleHeightY = 0;
             for (int i = 0; i < 22; i++)
             {
@@ -66,13 +72,12 @@ namespace helicopter
                 Controls.Add(picbObstacles);
             }
 
-            // Start 
-            t = new Thread(thHelicopterMovement);
-
-            
+            // Start Helicopter Movement Thread
+            thrHelicopterMovement = new Thread(funcHelicopterMovement);
         }
 
 
+        // Create Obstacle Timmer Tick
         private void timCreateObstacles_Tick(object sender, EventArgs e)
         {
             // Update Score
@@ -80,15 +85,15 @@ namespace helicopter
             lblScore.Text = intScore.ToString();
 
             // Change speed based on Score
-            if (intScore > 200)
+            if (intScore > 200 && intScore < 400)
             {
                 timCreateObstacles.Interval = 50;
             }
-            else if (intScore > 400)
+            else if (intScore > 400 && intScore < 600)
             {
                 timCreateObstacles.Interval = 25;
             }
-            else if (intScore > 600)
+            else if (intScore > 600 && intScore < 1000)
             {
                 timCreateObstacles.Interval = 15;
             }
@@ -97,14 +102,17 @@ namespace helicopter
                 timCreateObstacles.Interval = 2;
             }
 
-            // Remove obstacle
+            // Remove first obstacle from the top 
             Controls.Remove(lisTopObstacles.First());
             lisTopObstacles.First().Dispose();
             lisTopObstacles.RemoveAt(0);
 
+            // Remove first obstacle from the bottom
             Controls.Remove(lisBottomObstacles.First());
             lisBottomObstacles.First().Dispose();
             lisBottomObstacles.RemoveAt(0);
+
+            // Move each obstacle right 30px
             foreach (var conObstacle in lisTopObstacles)
             {
                 conObstacle.Location = new Point(conObstacle.Location.X - 30, conObstacle.Location.Y);
@@ -115,11 +123,11 @@ namespace helicopter
                 conObstacle.Location = new Point(conObstacle.Location.X - 30, conObstacle.Location.Y);
             }
 
-            // Create new obstalkes
+            // Create a new top obstacle
             PictureBox picbObstacles = new PictureBox
             {
                 Name = "",
-                Location = new Point(660 - 30, 0),
+                Location = new Point(Size.Width - 30, 0),
                 Size = new Size(30, 62),
                 Margin = new Padding(0, 0, 0, 0),
                 Height = rndRandomNumber.Next(1, 200),
@@ -128,12 +136,13 @@ namespace helicopter
             lisTopObstacles.Add(picbObstacles);
             Controls.Add(picbObstacles);
 
+            // Create a new bottom obstacle
             int intBottomObstacleHeightY = 0;
             intBottomObstacleHeightY = rndRandomNumber.Next(1, 200);
             PictureBox picbBObstacles = new PictureBox
             {
                 Name = "",
-                Location = new Point(660 - 30, ClientSize.Height - intBottomObstacleHeightY),
+                Location = new Point(Size.Width - 30, ClientSize.Height - intBottomObstacleHeightY),
                 Size = new Size(30, 62),
                 Margin = new Padding(0, 0, 0, 0),
                 Height = intBottomObstacleHeightY,
@@ -141,10 +150,11 @@ namespace helicopter
             };
             lisBottomObstacles.Add(picbBObstacles);
             Controls.Add(picbBObstacles);
-
         }
 
-        private void thHelicopterMovement()
+
+        // Helicopter Movement
+        private void funcHelicopterMovement()
         {
             while (true)
             {
@@ -160,6 +170,7 @@ namespace helicopter
             }
         }
 
+        // Move the Helicopter Up if Left Mouse Button Pressed else move the Helicopter Down
         private void funcMoveHelicopter()
         {
             System.Windows.Forms.MouseButtons pressedButtons = System.Windows.Forms.Control.MouseButtons;
@@ -174,8 +185,7 @@ namespace helicopter
             }
         }
 
-
-
+        // Check if the Helicopter has hit an obstacle
         private void funcHelicopterHitCheck()
         {
             if (picbHelicopter.Location.Y < lisTopObstacles.ElementAt(3).Height || picbHelicopter.Location.Y < lisTopObstacles.ElementAt(4).Height || picbHelicopter.Location.Y < lisTopObstacles.ElementAt(5).Height)
@@ -186,38 +196,47 @@ namespace helicopter
             {
                 funcGameOver();
             }
+           
         }
 
+        // Run when Game Over
         private void funcGameOver()
         {
             timCreateObstacles.Stop();
-            t.Suspend();
+            thrHelicopterMovement.Suspend();
 
+            // Ask user if they want to play again
             DialogResult dialogResult = MessageBox.Show("Game Over! \n \n Play again ?", "Game Over!", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.Yes)
             {
-                t.Resume();
+                thrHelicopterMovement.Resume();
                 timCreateObstacles.Start();
             }
             else if (dialogResult == DialogResult.No)
             {
+                Debug.WriteLine("exiting");
                 Close();
             }
         }
 
+        // Form Close Event
         private void frmGame_FormClosing(object sender, FormClosingEventArgs e)
         {
             try
             {
-                t.Abort();
+                thrHelicopterMovement.Abort();
             }
             catch (ThreadStateException)
             {
+
             }
         }
 
+        // Key Down Event
         private void frmGame_KeyDown(object sender, KeyEventArgs e)
         {
+
+            // Space to start / pause game
             if (e.KeyCode == Keys.Space)
             {
                 if (blnGameStart == false)
@@ -225,24 +244,31 @@ namespace helicopter
                     blnGameStart = true;
                     blnGameActive = true;
                     timCreateObstacles.Start();
-                    t.Start();
+                    thrHelicopterMovement.Start();
                 }
 
                 else if (blnGameActive == true)
                 {
                     blnGameActive = false;
                     timCreateObstacles.Stop();
-                    t.Suspend();
+                    thrHelicopterMovement.Suspend();
                 }
                 else if (blnGameActive == false)
                 {
                     blnGameActive = true;
                     timCreateObstacles.Start();
-                    t.Resume();
+                    thrHelicopterMovement.Resume();
                 }
+            }
+
+            // Cheats
+            if (e.KeyCode == Keys.E)
+            {
+                thrHelicopterMovement.Suspend();
             }
         }
 
+        // Helicopter Location Changed Event
         private void picbHelicopter_LocationChanged(object sender, EventArgs e)
         {
             funcHelicopterHitCheck();
